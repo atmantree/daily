@@ -4,14 +4,21 @@ module Main where
 
 import System.Environment (getArgs)
 import System.Directory (getHomeDirectory)
+import Data.Text (pack)
 import Database.SQLite.Simple
 
+createTableQuery :: Connection -> IO ()
+createTableQuery conn = execute_ conn $ Query $ pack ( 
+                                          "CREATE TABLE IF NOT EXISTS tasks "
+                                          ++ "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                                          ++ "task_name TEXT, progress  INTEGER, "
+                                          ++ "updated TEXT, created TEXT)")
 
 testDB :: IO ()
 testDB = do
       homePath <- getHomeDirectory 
       conn <- open $ homePath ++ "/test.db"
-      execute_ conn "CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, task_name TEXT, progress  INTEGER, updated TEXT, created TEXT)"
+      createTableQuery conn
       putStrLn "Testing database"
       close conn
 
