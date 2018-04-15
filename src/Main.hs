@@ -1,14 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 module Main where
 
 import System.Environment (getArgs)
 import System.Directory (getHomeDirectory)
 import Database.SQLite.Simple
 
+
 testDB :: IO ()
 testDB = do
       homePath <- getHomeDirectory 
       conn <- open $ homePath ++ "/test.db"
+      execute_ conn "CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, task_name TEXT, progress  INTEGER, updated TEXT, created TEXT)"
       putStrLn "Testing database"
       close conn
 
