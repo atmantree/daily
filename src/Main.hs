@@ -38,6 +38,11 @@ addNewTask task = putStrLn "TODO: add new task"
 deleteTask :: Integer -> IO ()
 deleteTask taskId = putStrLn "TODO: remove task from list"
 
+usageMsg :: String
+usageMsg = ( "daily 0.1.0.0\n"
+          ++ "usage: daily [all|add|update|del] [OPTION USAGE]\n\n"
+          ++ "daily add \"...\"                -- add a new task")
+
 dailyTasks args
   | args == []            = showTasks True
   | head args == "all"    = showTasks False
@@ -45,7 +50,7 @@ dailyTasks args
   | head args == "update" = setTaskProgress 0
   | head args == "del"    = deleteTask 0 
   | head args == "testdb" = testDB 
-  | otherwise             = putStrLn "TODO: add usage message"
+  | otherwise             = putStrLn usageMsg
 
 
 main :: IO ()
