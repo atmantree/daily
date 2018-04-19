@@ -6,6 +6,7 @@ import System.Environment (getArgs)
 import System.Directory (getHomeDirectory)
 import Data.Text (pack)
 import Database.SQLite.Simple
+-- import Database.SQLite.Simple.ToField
 
 createTableQuery :: Connection -> IO ()
 createTableQuery conn = execute_ conn $ Query $ pack ( 
@@ -33,7 +34,14 @@ setTaskProgress :: Integer -> IO ()
 setTaskProgress progress = putStrLn "TODO: set task progress"
 
 addNewTask :: [String] -> IO ()
-addNewTask task = putStrLn "TODO: add new task"
+addNewTask task = do
+              homePath <- getHomeDirectory
+              conn <- open $ homePath ++ "/daily.db"
+              createTableQuery conn
+              execute conn "INSERT INTO tasks (task_name, progress, updated, created) values (?, 0, datetime('now','localtime'), datetime('now','localtime'));" task
+              close conn
+              putStrLn "Task added."
+
 
 deleteTask :: Integer -> IO ()
 deleteTask taskId = putStrLn "TODO: remove task from list"
