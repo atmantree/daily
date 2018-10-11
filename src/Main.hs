@@ -9,9 +9,9 @@ import Database.SQLite.Simple
 -- import Database.SQLite.Simple.ToField
 
 data TaskOptions = ShowCurrent | ShowAll | AddTask String
-                   | UpdateProgress Integer Integer
-                   | UpdateName Integer String
-                   | DeleteTask Integer
+                   | UpdateProgress String String
+                   | UpdateName String String
+                   | DeleteTask String
                    deriving (Eq, Show)
 
 usageMsg :: String
@@ -22,16 +22,16 @@ usageMsg =
   ++ "daily all                           -- show all tasks\n"
   ++ "daily new \"<task-name>\"             -- add a new task\n"
   ++ "daily progress <task-id> <progress> -- set task progress\n"
-  ++ "daily name <task-id> \"<new-name>\"   -- set task new name\n"
-  ++ "daily del <task-id>                 -- delete task.\n")
+  ++ "daily rename <task-id> \"<new-name>\" -- set task new name\n"
+  ++ "daily delete <task-id>              -- delete task.\n")
 
 
 -- SQL statements
 createTable :: String
-createTable = "CREATE TABLE IF NOT EXISTS tasks (id INTEGER, description TEXT, done INTEGER, priority INT, created TEXT, updated TEXT);"
+createTable = "CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY, description TEXT, done INTEGER, priority INT, created TEXT, updated TEXT);"
 
-getTodayTasks :: String
-getTodayTasks = "SELECT * FROM tasks WHERE date = ?;"
+getTasks :: String
+getTasks = "SELECT * FROM tasks WHERE date = ?;"
 
 getAllTasks :: String
 getAllTasks = "SELECT * FROM tasks;"
@@ -54,15 +54,27 @@ delTask = "DELETE task WHERE id = ?;"
 
 -- Actions
 addTable :: Connection -> IO ()
-addTable conn = execute_ conn $ Query $ pack (createTable) 
+addTable conn = execute_ conn $ Query $ pack (createTable)
 
 showTasks :: Connection -> Bool -> IO ()
 showTasks conn showAll = if showAll == True then
+                           -- query: getAllTasks
                            putStrLn "TODO: show all tasks"
                          else
+                           -- query: getTasks
                            putStrLn "TODO: show current tasks"
 
+addNewTask :: Connection -> String -> IO ()
+addNewTask conn task = putStrLn $ "TODO: add new task \"" ++ task ++ "\"."
 
+updateProgress :: Connection -> String -> String -> IO ()
+updateProgress conn taskId progress = putStrLn $ "TODO: update progress of task #" ++ taskId ++ " to " ++ progress ++ "."
+
+updateDescription :: Connection -> String -> String -> IO ()
+updateDescription conn taskId description = putStrLn $ "TODO: rename task #" ++ taskId ++ " to \"" ++ description ++ "\"."
+
+deleteTask :: Connection -> String -> IO ()
+deleteTask conn taskId = putStrLn $ "TODO: delete task #" ++ taskId ++ "."
 
 -- addNewTask :: [String] -> IO ()
 -- addNewTask task = do
@@ -82,21 +94,24 @@ tasks opt = do
         case opt of
           ShowCurrent        -> showTasks conn False
           ShowAll            -> showTasks conn True
-          AddTask _          -> putStrLn "TODO: add new task"
-          UpdateProgress _ _ -> putStrLn "TODO: update task progress"
-          UpdateName _ _     -> putStrLn "TODO: update task progress"
-          DeleteTask _       -> putStrLn "TODO: delete task"
+          AddTask d          -> addNewTask conn d
+          UpdateProgress i p -> updateProgress conn i p
+          UpdateName i n     -> updateDescription conn i n
+          DeleteTask i       -> deleteTask conn i
         close conn
 
 daily :: [String] -> IO ()
 daily args
   | args == []              = tasks ShowCurrent
   | head args == "all"      = tasks ShowAll
-  | head args == "add"      = tasks $ AddTask "Test"
-  | head args == "progress" = tasks $ UpdateProgress 0 0
-  | head args == "name"     = tasks $ UpdateName 0 "Test"
-  | head args == "del"      = tasks $ DeleteTask 0
+  | head args == "new"      = tasks $ AddTask take2nd
+  | head args == "progress" = tasks $ UpdateProgress take2nd take3rd
+  | head args == "rename"   = tasks $ UpdateName take2nd take3rd
+  | head args == "delete"   = tasks $ DeleteTask take2nd
   | otherwise               = putStrLn usageMsg
+  where
+    take2nd = args !! 1
+    take3rd = args !! 2
 
 
 main :: IO ()
