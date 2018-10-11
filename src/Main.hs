@@ -17,7 +17,7 @@ data TaskOptions = ShowCurrent | ShowAll | AddTask String
 usageMsg :: String
 usageMsg =
   ( "daily 0.1.0.0\n"
-  ++ "usage: daily [all|new|progress|name|del] [OPTION USAGE]\n\n"
+  ++ "usage: daily [all|new|progress|rename|delete] [OPTION USAGE]\n\n"
   ++ "daily                               -- show current tasks\n"
   ++ "daily all                           -- show all tasks\n"
   ++ "daily new \"<task-name>\"             -- add a new task\n"
